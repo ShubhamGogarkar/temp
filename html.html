@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Habit Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .year {
+            color: #ff4757;
+            font-weight: bold;
+        }
+
+        .tracker-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .week-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .week-info {
+            text-align: center;
+            flex: 1;
+        }
+
+        .week-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ff4757;
+            margin-bottom: 5px;
+        }
+
+        .week-dates {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #ff3838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .week-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .week-select {
+            padding: 10px 20px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid #ff4757;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .week-select:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .quick-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-nav-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid #ff4757;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .quick-nav-btn:hover {
+            background: #ff4757;
+        }
+
+        .week-header {
+            display: grid;
+            grid-template-columns: 300px repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .week-label {
+            font-weight: bold;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+
+        .day-label {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .day-number {
+            display: block;
+            font-size: 1.3em;
+            color: #ff4757;
+            margin-top: 5px;
+        }
+
+        .day-letter {
+            color: #ffa502;
+        }
+
+        .habits-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .habit-row {
+            display: grid;
+            grid-template-columns: 300px repeat(7, 1fr);
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .habit-row:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+
+        .habit-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1em;
+            padding-left: 10px;
+        }
+
+        .habit-icon {
+            font-size: 1.3em;
+        }
+
+        .checkbox-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #ff4757;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .checkbox:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+        }
+
+        .checkbox.checked {
+            background: #ff4757;
+            border-color: #ff4757;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stats {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 71, 87, 0.2);
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff4757;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .reset-btn:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .tracker-wrapper {
+                padding: 15px;
+            }
+
+            .week-navigation {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .nav-btn {
+                padding: 12px 20px;
+                font-size: 0.9em;
+                width: 100%;
+            }
+
+            .week-title {
+                font-size: 1.4em;
+            }
+
+            .week-dates {
+                font-size: 0.85em;
+            }
+
+            .week-selector {
+                width: 100%;
+            }
+
+            .week-select {
+                width: 100%;
+                font-size: 0.9em;
+            }
+
+            .quick-nav {
+                gap: 8px;
+                width: 100%;
+            }
+
+            .quick-nav-btn {
+                padding: 8px 12px;
+                font-size: 0.85em;
+                flex: 1;
+            }
+
+            .week-header,
+            .habit-row {
+                grid-template-columns: 120px repeat(7, 1fr);
+                gap: 4px;
+                padding: 8px;
+            }
+
+            .week-label {
+                font-size: 0.9em;
+            }
+
+            .habit-name {
+                font-size: 0.75em;
+                padding-left: 5px;
+                gap: 5px;
+            }
+
+            .habit-icon {
+                font-size: 1em;
+            }
+
+            .checkbox {
+                width: 32px;
+                height: 32px;
+                border: 2px solid #ff4757;
+            }
+
+            .checkbox.checked::after {
+                font-size: 18px;
+            }
+
+            .day-label {
+                font-size: 0.65em;
+            }
+
+            .day-number {
+                font-size: 0.9em;
+            }
+
+            .day-letter {
+                font-size: 0.75em;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .stat-item {
+                padding: 12px;
+            }
+
+            .stat-value {
+                font-size: 1.5em;
+            }
+
+            .stat-label {
+                font-size: 0.75em;
+            }
+
+            .reset-btn {
+                font-size: 0.9em;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .week-header,
+            .habit-row {
+                grid-template-columns: 90px repeat(7, 1fr);
+                gap: 3px;
+                padding: 6px;
+            }
+
+            .habit-name {
+                font-size: 0.65em;
+                gap: 3px;
+            }
+
+            .habit-icon {
+                font-size: 0.9em;
+            }
+
+            .checkbox {
+                width: 28px;
+                height: 28px;
+            }
+
+            .checkbox.checked::after {
+                font-size: 16px;
+            }
+
+            .day-label {
+                font-size: 0.55em;
+            }
+
+            .day-number {
+                font-size: 0.8em;
+                margin-top: 2px;
+            }
+
+            .week-title {
+                font-size: 1.2em;
+            }
+
+            .week-dates {
+                font-size: 0.75em;
+            }
+
+            .quick-nav-btn {
+                font-size: 0.75em;
+                padding: 6px 8px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 1.3em;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .week-header,
+            .habit-row {
+                grid-template-columns: 250px repeat(7, 1fr);
+            }
+
+            .habit-name {
+                font-size: 0.9em;
+            }
+
+            .checkbox {
+                width: 38px;
+                height: 38px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="year">2026</span> in under my control.</h1>
+        </div>
+
+        <div class="tracker-wrapper">
+            <div class="week-navigation">
+                <button class="nav-btn" id="prevBtn" onclick="changeWeek(-1)">
+                    <span>←</span> Previous
+                </button>
+                
+                <div class="week-info">
+                    <div class="week-title" id="weekTitle">Week 1</div>
+                    <div class="week-dates" id="weekDates">Jan 1 - Jan 7, 2026</div>
+                    <div class="week-selector">
+                        <select class="week-select" id="weekSelect" onchange="jumpToWeek()">
+                            <!-- Will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="quick-nav">
+                        <button class="quick-nav-btn" onclick="jumpToWeekNumber(1)">Week 1</button>
+                        <button class="quick-nav-btn" onclick="jumpToCurrentWeek()">Current Week</button>
+                        <button class="quick-nav-btn" onclick="jumpToWeekNumber(52)">Week 52</button>
+                    </div>
+                </div>
+                
+                <button class="nav-btn" id="nextBtn" onclick="changeWeek(1)">
+                    Next <span>→</span>
+                </button>
+            </div>
+
+            <div class="week-header" id="weekHeader">
+                <div class="week-label">DAILY HABITS</div>
+            </div>
+
+            <div class="habits-container" id="habitsContainer"></div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="weekCompleted">0/7</span>
+                    <span class="stat-label">Week Progress</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalChecked">0</span>
+                    <span class="stat-label">Total Completed (All Year)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="completionRate">0%</span>
+                    <span class="stat-label">Overall Completion Rate</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="longestStreak">0</span>
+                    <span class="stat-label">Longest Streak (Days)</span>
+                </div>
+            </div>
+
+            <button class="reset-btn" onclick="resetAll()">Reset Entire Year</button>
+        </div>
+    </div>
+
+    <script>
+        const habits = [
+            { name: '6 blocks of work', icon: '💼' },
+            { name: 'Gym 1h30 / Run 1h', icon: '💪' },
+            { name: '4 L of water', icon: '💧' },
+            { name: 'Meditate', icon: '🧘' },
+            { name: 'Complete all tasks', icon: '📋' },
+            { name: 'Read 20 pages', icon: '📚' },
+            { name: 'Limit scroll time (45min)', icon: '📱' },
+            { name: 'Be grateful/pray', icon: '🙏' },
+            { name: 'good mood', icon: '😊' },
+            { name: 'sleep 7h', icon: '😴' },
+            { name: 'Interact with 3 people', icon: '💬' },
+            { name: 'Spend $50 or less', icon: '💰' },
+            { name: 'Self-care', icon: '🛁' }
+        ];
+
+        const daysOfWeek = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const totalWeeks = 52;
+        const daysPerWeek = 7;
+
+        let currentWeek = 1;
+        let checkboxStates = JSON.parse(localStorage.getItem('habitStates')) || {};
+
+        const habitsContainer = document.getElementById('habitsContainer');
+        const weekHeader = document.getElementById('weekHeader');
+
+        // Get current week number of 2026
+        function getCurrentWeekOfYear() {
+            const now = new Date();
+            const start = new Date(2026, 0, 1); // Jan 1, 2026
+            const diff = now - start;
+            const oneWeek = 1000 * 60 * 60 * 24 * 7;
+            const week = Math.ceil(diff / oneWeek);
+            return Math.max(1, Math.min(week, 52));
+        }
+
+        // Calculate date range for a given week
+        function getWeekDates(weekNum) {
+            const startDate = new Date(2026, 0, 1 + (weekNum - 1) * 7);
+            const endDate = new Date(2026, 0, 7 + (weekNum - 1) * 7);
+            
+            const startMonth = monthNames[startDate.getMonth()];
+            const endMonth = monthNames[endDate.getMonth()];
+            const startDay = startDate.getDate();
+            const endDay = endDate.getDate();
+            
+            if (startMonth === endMonth) {
+                return `${startMonth} ${startDay} - ${endDay}, 2026`;
+            } else {
+                return `${startMonth} ${startDay} - ${endMonth} ${endDay}, 2026`;
+            }
+        }
+
+        // Get day number for a specific day in a week
+        function getDayNumber(weekNum, dayIndex) {
+            return (weekNum - 1) * 7 + dayIndex + 1;
+        }
+
+        // Initialize week selector dropdown
+        function initializeWeekSelector() {
+            const weekSelect = document.getElementById('weekSelect');
+            weekSelect.innerHTML = '';
+            
+            for (let i = 1; i <= totalWeeks; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Week ${i} (${getWeekDates(i)})`;
+                weekSelect.appendChild(option);
+            }
+            
+            weekSelect.value = currentWeek;
+        }
+
+        // Update week header with days
+        function updateWeekHeader() {
+            // Clear existing day labels
+            const existingDays = weekHeader.querySelectorAll('.day-label');
+            existingDays.forEach(day => day.remove());
+            
+            // Add day labels for current week
+            for (let day = 0; day < daysPerWeek; day++) {
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'day-label';
+                const dayNum = getDayNumber(currentWeek, day);
+                dayLabel.innerHTML = `<span class="day-letter">${daysOfWeek[day]}</span><span class="day-number">${dayNum}</span>`;
+                weekHeader.appendChild(dayLabel);
+            }
+        }
+
+        // Update week info display
+        function updateWeekInfo() {
+            document.getElementById('weekTitle').textContent = `Week ${currentWeek}`;
+            document.getElementById('weekDates').textContent = getWeekDates(currentWeek);
+            document.getElementById('weekSelect').value = currentWeek;
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentWeek === 1;
+            document.getElementById('nextBtn').disabled = currentWeek === totalWeeks;
+        }
+
+        // Initialize or update habits display
+        function updateHabitsDisplay() {
+            habitsContainer.innerHTML = '';
+            
+            habits.forEach((habit, habitIndex) => {
+                const habitRow = document.createElement('div');
+                habitRow.className = 'habit-row';
+                
+                const habitName = document.createElement('div');
+                habitName.className = 'habit-name';
+                habitName.innerHTML = `<span class="habit-icon">${habit.icon}</span> ${habit.name}`;
+                habitRow.appendChild(habitName);
+                
+                // Create checkboxes for current week only
+                for (let day = 0; day < daysPerWeek; day++) {
+                    const checkboxCell = document.createElement('div');
+                    checkboxCell.className = 'checkbox-cell';
+                    
+                    const checkbox = document.createElement('div');
+                    checkbox.className = 'checkbox';
+                    
+                    // Calculate global day index
+                    const globalDay = (currentWeek - 1) * daysPerWeek + day;
+                    const key = `${habitIndex}-${globalDay}`;
+                    
+                    if (checkboxStates[key]) {
+                        checkbox.classList.add('checked');
+                    }
+                    
+                    checkbox.onclick = () => toggleCheckbox(habitIndex, globalDay, checkbox);
+                    checkboxCell.appendChild(checkbox);
+                    habitRow.appendChild(checkboxCell);
+                }
+                
+                habitsContainer.appendChild(habitRow);
+            });
+            
+            updateStats();
+        }
+
+        function toggleCheckbox(habitIndex, globalDay, element) {
+            const key = `${habitIndex}-${globalDay}`;
+            
+            if (checkboxStates[key]) {
+                delete checkboxStates[key];
+                element.classList.remove('checked');
+            } else {
+                checkboxStates[key] = true;
+                element.classList.add('checked');
+            }
+            
+            localStorage.setItem('habitStates', JSON.stringify(checkboxStates));
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalDays = totalWeeks * daysPerWeek;
+            const totalPossible = habits.length * totalDays;
+            const totalChecked = Object.keys(checkboxStates).length;
+            const completionRate = Math.round((totalChecked / totalPossible) * 100);
+            
+            // Calculate current week progress
+            let weekChecked = 0;
+            let weekTotal = habits.length * daysPerWeek;
+            for (let day = 0; day < daysPerWeek; day++) {
+                const globalDay = (currentWeek - 1) * daysPerWeek + day;
+                for (let habit = 0; habit < habits.length; habit++) {
+                    if (checkboxStates[`${habit}-${globalDay}`]) {
+                        weekChecked++;
+                    }
+                }
+            }
+            
+            document.getElementById('weekCompleted').textContent = `${weekChecked}/${weekTotal}`;
+            document.getElementById('totalChecked').textContent = totalChecked;
+            document.getElementById('completionRate').textContent = completionRate + '%';
+            
+            // Calculate longest streak (consecutive days where ALL habits are completed)
+            let longestStreak = 0;
+            let tempStreak = 0;
+            for (let day = 0; day < totalDays; day++) {
+                let dayComplete = true;
+                for (let habit = 0; habit < habits.length; habit++) {
+                    if (!checkboxStates[`${habit}-${day}`]) {
+                        dayComplete = false;
+                        break;
+                    }
+                }
+                if (dayComplete) {
+                    tempStreak++;
+                    longestStreak = Math.max(longestStreak, tempStreak);
+                } else {
+                    tempStreak = 0;
+                }
+            }
+            
+            document.getElementById('longestStreak').textContent = longestStreak;
+        }
+
+        function changeWeek(delta) {
+            const newWeek = currentWeek + delta;
+            if (newWeek >= 1 && newWeek <= totalWeeks) {
+                currentWeek = newWeek;
+                updateWeekHeader();
+                updateWeekInfo();
+                updateHabitsDisplay();
+            }
+        }
+
+        function jumpToWeek() {
+            const weekSelect = document.getElementById('weekSelect');
+            currentWeek = parseInt(weekSelect.value);
+            updateWeekHeader();
+            updateWeekInfo();
+            updateHabitsDisplay();
+        }
+
+        function jumpToWeekNumber(weekNum) {
+            currentWeek = weekNum;
+            updateWeekHeader();
+            updateWeekInfo();
+            updateHabitsDisplay();
+        }
+
+        function jumpToCurrentWeek() {
+            currentWeek = getCurrentWeekOfYear();
+            updateWeekHeader();
+            updateWeekInfo();
+            updateHabitsDisplay();
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all habits for the entire year? This cannot be undone.')) {
+                checkboxStates = {};
+                localStorage.removeItem('habitStates');
+                updateHabitsDisplay();
+            }
+        }
+
+        // Initialize on load
+        initializeWeekSelector();
+        currentWeek = getCurrentWeekOfYear(); // Start at current week
+        updateWeekHeader();
+        updateWeekInfo();
+        updateHabitsDisplay();
+    </script>
+</body>
+</html>
